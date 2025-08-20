@@ -42,15 +42,24 @@ const form = document.querySelector('.book-form')
     })
     }
 
-    // Add book زرار 
-    addBtn.addEventListener('click', () => {
-        form.reset();
-        overlay.classList.add("active");
-    })
+    // handle Add book button
+addBtn.addEventListener('click', () => {
+    form.reset();
+    overlay.classList.add("active");
+});
+// handle click on overlay && stopPropagation
+overlay.addEventListener('click', () => {
+    form.reset();
+    overlay.classList.remove("active");
+});
+form.addEventListener('click', (e) => {
+    e.stopPropagation();
+});
 
-    // فورم إضافة الكتاب
+
+    // handle submit && return data from the form input
     form.addEventListener('submit', e => {
-    e.preventDefault()
+        e.preventDefault();
     const inputs = form.querySelectorAll('input')
     books.push({
     title: inputs[0].value,
@@ -58,7 +67,7 @@ const form = document.querySelector('.book-form')
     pages: inputs[2].value,
     isRead: inputs[3].checked,
     })
-    localStorage.setItem('books', JSON.stringify(books)) // حفظ بعد الإضافة
+    localStorage.setItem('books', JSON.stringify(books)) 
     form.reset()
     overlay.classList.remove("active");
     renderBooks()
