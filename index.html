@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+        rel="stylesheet" />
+    <link rel="shortcut icon" href="assets/favicon.png" />
+    <title>Library</title>
+</head>
+
+<body>
+        <!-- Header -->
+        <div class="header">
+                <div class="container">
+                    <h1>library</h1>
+                </div>
+        </div>
+        <!-- Main Content -->
+        <div class="main container">
+            <button class="btn btn-add">+ Add book</button>
+            <div class="books-con" >
+                
+                <div class="book">
+                    <h2>"Book Name"</h2>
+                    <Span>Author</Span>
+                    <Span>22 Pages</Span>
+                    <div class="group-btn ">
+                        <button class="btn btn-green">Read</button>
+                        <button class="btn">Remove</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="overlay">
+            <form class="book-form" >
+                <h3>Add new book</h3>
+                <input  type="text"  placeholder="Title" required maxlength="50" />
+                <input  type="text"  placeholder="Author" required maxlength="50" />
+                <input  type="number"  placeholder="Pages" required max="1000" />
+                <div class="is-read">
+                    <label for="is-read">Have you read it?</label>
+                    <input class="checkbox" type="checkbox" id="isRead" />
+                </div>
+                <button class="btn btn-green" type="submit">Submit</button> </form>
+        </div>    
+
+    <script src="main.js"></script>
+</body>
+
+</html>

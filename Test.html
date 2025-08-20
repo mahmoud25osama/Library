@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .btn {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .btn-light-green {
+            background: #4caf50;
+            color: #fff;
+        }
+
+        .btn-light-red {
+            background: #f44336;
+            color: #fff;
+        }
+
+        .book-card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .button-group {
+            margin-top: 10px;
+        }
+
+        .modal,
+        .overlay {
+            display: none;
+        }
+
+        .modal.active,
+        .overlay.active {
+            display: block;
+        }
+
+        .modal {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            width: 300px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 5;
+        }
+
+        #errorMsg.active {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📚 My Library</h1>
+    <button id="addBookBtn" class="btn">+ Add Book</button>
+    <div id="booksGrid"></div>
+
+    <!-- Modal  -->
+    <div id="addBookModal" class="modal">
+        <form id="addBookForm">
+            <label>Title: <input type="text" id="title" required></input></label><br/>
+            <label>Author: <input type="text" id="author" required></input></label><br/>
+            <label>Pages: <input type="number" id="pages" required></input></label><br/>
+            <label><input type="checkbox" id="isRead"></input> Already Read</label><br/>
+            <button type="submit" class="btn">Save</button>
+            <button type="button" class="btn" onclick="closeAddBookModal()">Cancel</button>
+            <p id="errorMsg"></p>
+        </form>
+    </div>
+    <div id="overlay" class="overlay"></div>
+
+    <script>
+        // ========== Data Structures ==========
+        function createBook(title = 'Unknown', author = 'Unknown', pages = '0', isRead = false) {
+            return { title, author, pages, isRead }
+        }
+
+        function createLibrary() {
+            let books = []
+            function addBook(newBook) {
+                if (!isInLibrary(newBook)) { books.push(newBook) }
+            }
+            function removeBook(title) {
+                books = books.filter((book) => book.title !== title)
+            }
+            function getBook(title) {
+                return books.find((book) => book.title === title)
+            }
+            function isInLibrary(newBook) {
+                return books.some((book) => book.title === newBook.title)
+            }
+            function getBooks() { return books }
+            function setBooks(newBooks) { books = newBooks }
+            return { addBook, removeBook, getBook, isInLibrary, getBooks, setBooks }
+        }
+
+        const library = createLibrary()
+
+        // ========== UI Elements ==========
+        const addBookBtn = document.getElementById('addBookBtn')
+        const addBookModal = document.getElementById('addBookModal')
+        const errorMsg = document.getElementById('errorMsg')
+        const overlay = document.getElementById('overlay')
+        const addBookForm = document.getElementById('addBookForm')
+        const booksGrid = document.getElementById('booksGrid')
+
+        const openAddBookModal = () => {
+            addBookForm.reset()
+            addBookModal.classList.add('active')
+            overlay.classList.add('active')
+        }
+
+        function closeAddBookModal() {
+            addBookModal.classList.remove('active')
+            overlay.classList.remove('active')
+            errorMsg.classList.remove('active')
+            errorMsg.textContent = ''
+        }
+
+        const closeAllModals = () => { closeAddBookModal() }
+        const handleKeyboardInput = (e) => { if (e.key === 'Escape') closeAllModals() }
+
+        const updateBooksGrid = () => {
+            resetBooksGrid()
+            for (let book of library.getBooks()) { createBookCard(book) }
+        }
+
+        const resetBooksGrid = () => { booksGrid.innerHTML = '' }
+
+        const createBookCard = (book) => {
+            const bookCard = document.createElement('div')
+            const title = document.createElement('p')
+            const author = document.createElement('p')
+            const pages = document.createElement('p')
+            const buttonGroup = document.createElement('div')
+            const readBtn = document.createElement('button')
+            const removeBtn = document.createElement('button')
+
+            bookCard.classList.add('book-card')
+            buttonGroup.classList.add('button-group')
+            readBtn.classList.add('btn')
+            removeBtn.classList.add('btn')
+            readBtn.onclick = toggleRead
+            removeBtn.onclick = removeBook
+
+            title.textContent = `"${book.title}"`
+            author.textContent = book.author
+            pages.textContent = `${book.pages} pages`
+            removeBtn.textContent = 'Remove'
+
+            if (book.isRead) {
+                readBtn.textContent = 'Read'
+                readBtn.classList.add('btn-light-green')
+            } else {
+                readBtn.textContent = 'Not read'
+                readBtn.classList.add('btn-light-red')
+            }
+
+            bookCard.appendChild(title)
+            bookCard.appendChild(author)
+            bookCard.appendChild(pages)
+            buttonGroup.appendChild(readBtn)
+            buttonGroup.appendChild(removeBtn)
+            bookCard.appendChild(buttonGroup)
+            booksGrid.appendChild(bookCard)
+        }
+
+        const getBookFromInput = () => {
+            const title = document.getElementById('title').value
+            const author = document.getElementById('author').value
+            const pages = document.getElementById('pages').value
+            const isRead = document.getElementById('isRead').checked
+            return createBook(title, author, pages, isRead)
+        }
+
+        const addBook = (e) => {
+            e.preventDefault()
+            const newBook = getBookFromInput()
+            if (library.isInLibrary(newBook)) {
+                errorMsg.textContent = 'This book already exists in your library'
+                errorMsg.classList.add('active')
+                return
+            }
+            library.addBook(newBook)
+            saveLocal()
+            updateBooksGrid()
+            closeAddBookModal()
+        }
+
+        const removeBook = (e) => {
+            const title = e.target.parentNode.parentNode.firstChild.innerHTML.replaceAll('"', '')
+            library.removeBook(title)
+            saveLocal()
+            updateBooksGrid()
+        }
+
+        const toggleRead = (e) => {
+            const title = e.target.parentNode.parentNode.firstChild.innerHTML.replaceAll('"', '')
+            const book = library.getBook(title)
+            book.isRead = !book.isRead
+            saveLocal()
+            updateBooksGrid()
+        }
+
+        addBookBtn.onclick = openAddBookModal
+        overlay.onclick = closeAllModals
+        addBookForm.onsubmit = addBook
+        window.onkeydown = handleKeyboardInput
+
+        // ========== Local Storage ==========
+        const saveLocal = () => {
+            localStorage.setItem('library', JSON.stringify(library.getBooks()));
+        };
+        const restoreLocal = () => {
+            const books = JSON.parse(localStorage.getItem('library'));
+            if (books) {
+                library.setBooks(books.map((b) => createBook(b.title, b.author, b.pages, b.isRead)))
+            } else {
+                library.setBooks([])
+            }
+        }
+
+        // Initialize
+        restoreLocal()
+        updateBooksGrid()
+    </script>
+</body>
+
+</html>
